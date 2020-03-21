@@ -1,3 +1,4 @@
+ARCHS = arm64 arm64e
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = HideSenderPreferences
@@ -5,6 +6,7 @@ HideSenderPreferences_FILES = HideSenderPreferencesController.m
 HideSenderPreferences_INSTALL_PATH = /Library/PreferenceBundles
 HideSenderPreferences_FRAMEWORKS = UIKit
 HideSenderPreferences_LDFLAGS = ./Preferences.tbd
+HideSenderPreferences_LIBRARIES = sparkapplist
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

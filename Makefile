@@ -3,6 +3,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = HideSender
 HideSender_FILES = HideSender.xm
+HideSender_LIBRARIES = sparkapplist
 
 export COPYFILE_DISABLE = 1
 

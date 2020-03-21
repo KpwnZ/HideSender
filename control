@@ -1,6 +1,6 @@
 Package: com.xcxiao.hidesender
 Name: HideSender
-Depends: mobilesubstrate
+Depends: mobilesubstrate, com.spark.libsparkapplist
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!

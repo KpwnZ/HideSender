@@ -44,6 +44,14 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Select Apps</string>
+			<key>action</key>
+			<string>selectEnabledApps</string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSEditTextCell</string>
 			<key>defaults</key>
 			<string>com.xcxiao.hideSender</string>

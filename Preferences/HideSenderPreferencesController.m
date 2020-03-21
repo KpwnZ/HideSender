@@ -1,5 +1,6 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSSpecifier.h>
+#import <libSparkAppList/SparkAppListTableViewController.h>
 #import <spawn.h>
 
 @interface HidenSenderPreferencesController : PSListController
@@ -33,6 +34,14 @@
 	if (notificationName) {
 		CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), notificationName, NULL, NULL, YES);
 	}
+}
+
+- (void)selectEnabledApps {
+    // Replace "com.spark.notchlessprefs" and "excludedApps" with your strings
+    SparkAppListTableViewController* s = [[SparkAppListTableViewController alloc] initWithIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps"];
+
+    [self.navigationController pushViewController:s animated:YES];
+    self.navigationItem.hidesBackButton = FALSE;
 }
 
 - (void)respring {

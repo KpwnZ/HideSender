@@ -1,20 +1,25 @@
 #import <objc/runtime.h>
+#import <libSparkAppList/SparkAppList.h>
 
 @interface NCNotificationListCollectionView : UICollectionView
 @end
 
+@interface NSNotificationRequest : NSObject
+@property (nonatomic, retain) NSString *sectionIdentifier;
+@end
+
+@interface NCNotificationShortLookViewController : UIViewController
+@property (nonatomic, retain) NSNotificationRequest *notificationRequest;
+@end
+
 @interface NCNotificationContentView : UIView
-@property(nonatomic, retain) NSString * primaryText;
-@property(nonatomic, retain) NSString * secondaryText;
-@property(nonatomic, strong) NSString * originalTitle;
-@property(nonatomic, strong) NSString * originalMessage;
+@property (nonatomic, retain) NSString * primaryText;
+@property (nonatomic, retain) NSString * secondaryText;
+@property (nonatomic, retain) UILabel *primaryLabel;
+@property (nonatomic, strong) NSString * originalTitle;
+@property (nonatomic, strong) NSString * originalMessage;
+- (NCNotificationShortLookViewController *) currentNotificationViewController ;
 @end
-
-@interface UIView (associatedObject)
-@property(nonatomic, strong) NSString * originalTitle;
-@property(nonatomic, strong) NSString * originalMessage;
-@end
-
 
 NCNotificationListCollectionView *notificationList = nil;
 
@@ -38,27 +43,54 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 %property(nonatomic, strong) NSString * originalTitle;
 %property(nonatomic, strong) NSString * originalMessage;
 
-- (instancetype)initWithStyle:(NSInteger)arg1 {
-	NCNotificationContentView *cv = %orig;
-	[[NSNotificationCenter defaultCenter] addObserver:cv selector:@selector(showSender) name:@"showSender" object:nil];
-	[[NSNotificationCenter defaultCenter] addObserver:cv selector:@selector(hideSender) name:@"hideSender" object:nil];
-	return cv;
+- (void)didMoveToWindow {
+	%orig;
+
+	NCNotificationShortLookViewController *vc = [self currentNotificationViewController];
+	if(!vc) return;
+
+	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
+
+	if([SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) {
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNotificationSender) name:@"com.xcxiao.showNCSender" object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideNotificationSender) name:@"com.xcxiao.hideNCSender" object:nil];
+	}
 }
 
 - (void)setPrimaryText:(NSString *)str {
-	self.originalTitle = str;
-	if(enabled && locked && str && ![str isEqualToString:@""]) %orig(censorText);
+	if(str && ![str isEqualToString:censorText]) self.originalTitle = str;
+
+	NCNotificationShortLookViewController *vc = [self currentNotificationViewController];
+	if(!vc) %orig(str);
+
+	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
+
+	if(enabled && locked && str && ![str isEqualToString:@""] && [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) %orig(censorText);
 	else %orig(str);
 }
 
 %new
-- (void)showSender {
+- (void)showNotificationSender {
 	[self setPrimaryText:self.originalTitle];
 }
 
 %new
-- (void)hideSender {
-	if(self.originalTitle && ![self.originalTitle isEqualToString:@""]) [self setPrimaryText:censorText];
+- (void)hideNotificationSender {
+	if(self.originalTitle && ![self.originalTitle isEqualToString:@""]) {
+		[self setPrimaryText:censorText];
+	}
+}
+
+%new
+- (NCNotificationShortLookViewController *) currentNotificationViewController {
+    UIResponder *next = [self nextResponder];
+    do {
+        if ([next isKindOfClass:%c(NCNotificationShortLookViewController)]) {
+            return (NCNotificationShortLookViewController *)next;
+        }
+        next = [next nextResponder];
+    } while (next != nil);
+    return nil;
 }
 
 %end
@@ -69,8 +101,8 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 	%orig;
 	locked = !arg1;
 	if(enabled) {
-		if(!locked) [[NSNotificationCenter defaultCenter] postNotificationName:@"showSender" object:nil userInfo:nil];
-		else [[NSNotificationCenter defaultCenter] postNotificationName:@"hideSender" object:nil userInfo:nil];
+		if(!locked) [[NSNotificationCenter defaultCenter] postNotificationName:@"com.xcxiao.showNCSender" object:nil userInfo:nil];
+		else [[NSNotificationCenter defaultCenter] postNotificationName:@"com.xcxiao.hideNCSender" object:nil userInfo:nil];
 	}
 }
 
