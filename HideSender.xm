@@ -18,6 +18,7 @@
 @property (nonatomic, retain) UILabel *primaryLabel;
 @property (nonatomic, strong) NSString * originalTitle;
 @property (nonatomic, strong) NSString * originalMessage;
+@property (nonatomic, assign) BOOL originalTitleOnceSet;
 - (NCNotificationShortLookViewController *) currentNotificationViewController ;
 - (BOOL)isAllowedToHideSender ;
 @end
@@ -45,6 +46,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 %property(nonatomic, strong) NSString * originalTitle;
 %property(nonatomic, strong) NSString * originalMessage;
+%property(nonatomic, assign) BOOL originalTitleOnceSet;
 
 - (void)didMoveToWindow {
 	%orig;
@@ -56,10 +58,14 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 }
 
 - (void)setPrimaryText:(NSString *)str {
-	if(str && ![str isEqualToString:censorText] && ![str isEqualToString:@""]) self.originalTitle = str;
 
-	if(enabled && locked && str && ![str isEqualToString:@""] && [self isAllowedToHideSender]) %orig(censorText);
-	else %orig(str);
+	if(enabled && ![str isEqualToString:censorText]) {
+		self.originalTitle = str;
+		%orig(str);
+	}
+	if(enabled && !locked && ![str isEqualToString:censorText]) %orig(str);
+	if((enabled && locked && [self.primaryText isEqualToString:censorText]) || str == nil || self.primaryText == nil) return;
+	if(enabled && locked && ![self.primaryText isEqualToString:censorText] && [self isAllowedToHideSender] && self.originalTitle) %orig(censorText);
 }
 
 %new
@@ -78,7 +84,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 %new
 - (void)hideNotificationSender {
-	if(self.originalTitle && ![self.originalTitle isEqualToString:@""]) {
+	if(self.originalTitle) {
 		[self setPrimaryText:censorText];
 	}
 }
