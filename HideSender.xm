@@ -25,6 +25,7 @@ NCNotificationListCollectionView *notificationList = nil;
 
 static BOOL enabled;
 static BOOL messageEnabled;
+static BOOL allApps;
 static NSString *censorText;
 static BOOL locked = YES;
 
@@ -33,6 +34,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 	enabled = prefs[@"enabled"] ? [prefs[@"enabled"] boolValue] : YES;
 	messageEnabled = prefs[@"messageEnabled"] ? [prefs[@"messageEnabled"] boolValue] : NO;
+	allApps = prefs[@"allApps"] ? [prefs[@"allApps"] boolValue] : NO;
 	censorText = prefs[@"censorText"] && !([prefs[@"censorText"] isEqualToString:@""]) ? [prefs[@"censorText"] stringValue] : @"Protected by HideSender";
 
 	[prefs release];
@@ -51,7 +53,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
 
-	if([SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) {
+	if(allApps || [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNotificationSender) name:@"com.xcxiao.showNCSender" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideNotificationSender) name:@"com.xcxiao.hideNCSender" object:nil];
 	}
@@ -65,7 +67,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
 
-	if(enabled && locked && str && ![str isEqualToString:@""] && [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) %orig(censorText);
+	if(allApps || (enabled && locked && str && ![str isEqualToString:@""] && [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier])) %orig(censorText);
 	else %orig(str);
 }
 

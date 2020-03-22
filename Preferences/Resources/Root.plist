@@ -44,6 +44,20 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>defaults</key>
+			<string>com.xcxiao.hideSender</string>
+			<key>key</key>
+			<string>allApps</string>
+			<key>label</key>
+			<string>Hide All Sender</string>
+			<key>default</key>
+			<false/>
+			<key>PostNotification</key>
+			<string>com.xcxiao.hideSender.preferencesChanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
 			<string>Select Apps</string>
