@@ -19,6 +19,7 @@
 @property (nonatomic, strong) NSString * originalTitle;
 @property (nonatomic, strong) NSString * originalMessage;
 - (NCNotificationShortLookViewController *) currentNotificationViewController ;
+- (BOOL)isAllowedToHideSender ;
 @end
 
 NCNotificationListCollectionView *notificationList = nil;
@@ -48,32 +49,31 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 - (void)didMoveToWindow {
 	%orig;
 
-	NCNotificationShortLookViewController *vc = [self currentNotificationViewController];
-	if(!vc) return;
-
-	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
-
-	if(allApps || [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]) {
+	if([self isAllowedToHideSender]) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showNotificationSender) name:@"com.xcxiao.showNCSender" object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideNotificationSender) name:@"com.xcxiao.hideNCSender" object:nil];
 	}
 }
 
 - (void)setPrimaryText:(NSString *)str {
-	if(str && ![str isEqualToString:censorText]) self.originalTitle = str;
+	if(str && ![str isEqualToString:censorText] && ![str isEqualToString:@""]) self.originalTitle = str;
 
-	NCNotificationShortLookViewController *vc = [self currentNotificationViewController];
-	if(!vc) %orig(str);
-
-	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
-
-	if(enabled && locked && str && ![str isEqualToString:@""] && (allApps || [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier])) %orig(censorText);
+	if(enabled && locked && str && ![str isEqualToString:@""] && [self isAllowedToHideSender]) %orig(censorText);
 	else %orig(str);
 }
 
 %new
+-(BOOL)isAllowedToHideSender {
+	NCNotificationShortLookViewController *vc = [self currentNotificationViewController];
+	if(!vc) return NO;
+	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
+
+	return (allApps || [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier]);
+}
+
+%new
 - (void)showNotificationSender {
-	[self setPrimaryText:self.originalTitle];
+	if(self.originalTitle != nil && [self isAllowedToHideSender]) [self setPrimaryText:self.originalTitle];
 }
 
 %new
