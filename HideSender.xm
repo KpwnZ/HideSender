@@ -67,7 +67,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 	NSString *bundleIdentifier = vc.notificationRequest.sectionIdentifier;
 
-	if(allApps || (enabled && locked && str && ![str isEqualToString:@""] && [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier])) %orig(censorText);
+	if((allApps && locked) || (enabled && locked && str && ![str isEqualToString:@""] && [SparkAppList doesIdentifier:@"com.xcxiao.hideSender" andKey:@"enabledApps" containBundleIdentifier:bundleIdentifier])) %orig(censorText);
 	else %orig(str);
 }
 
